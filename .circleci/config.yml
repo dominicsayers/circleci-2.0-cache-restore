@@ -1,0 +1,32 @@
+---
+version: 2
+
+ruby_docker_image: &ruby_docker_image
+  image: circleci/ruby # Change this to just "ruby" and it works
+
+jobs:
+  save_the_cache:
+    docker:
+      - <<: *ruby_docker_image
+    steps:
+      - run: touch /usr/local/bundle/example.txt
+      - save_cache:
+          key: my-bundle-cache
+          paths:
+            - /usr/local/bundle
+
+  restore_the_cache:
+    docker:
+      - <<: *ruby_docker_image
+    steps:
+      - restore_cache:
+          keys:
+            - my-bundle-cache
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - save_the_cache
+      - restore_the_cache:
+          requires: [save_the_cache]
